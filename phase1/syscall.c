@@ -14,7 +14,7 @@ int GetPid() {                    // no input, has return
 int GetTime() {                   // no input, has return
     int time;
 
-    asm("int $48; movl %%eax, %0"
+    asm("int $49; movl %%eax, %0"
         : "=g" (time)
         :
         : "%eax"
