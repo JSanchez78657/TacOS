@@ -100,7 +100,7 @@ void Scheduler() {
     }
     else {
         //   If we have no processes running, our kernel should panic
-        cons_printf("PANIC: No running process.");
+        cons_printf("Kernel Panic: no running process.");
         //   we should trigger a breakpoint for debugging
         breakpoint();
     }
