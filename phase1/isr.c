@@ -19,8 +19,6 @@ void CheckSleep() {
         }
         // If not, add it back to the sleep queue
         else enqueue(pid, &sleep_q);
-    }
-}
 
 void NewProcISR() {
     int pid;
@@ -135,6 +133,6 @@ void SleepISR() {
 	  // Change the running process state to SLEEP
     pcb[run_pid].state = SLEEP;
 	  // Pull next ready process from the process queue
-    /*This might not be right*/run_pid = -1;
+    /*This might not be right*/run_pid = dequeue(&run_q);
 }
 

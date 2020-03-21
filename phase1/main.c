@@ -64,6 +64,8 @@ void SetData() {
     for(i = 0; i < MAX_PROC; ++i) {
       pcb[i].state = UNUSED;
       enqueue(i, &unused_q);
+
+    
     }
 
     // Initiallize the running pid so the schedule will kick in
