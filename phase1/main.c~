@@ -53,9 +53,9 @@ void SetEntry(int entry_num, func_ptr_t func_ptr) {
 void SetData() {
     int i;
     // Ensure that we clear all of our queues using bzero from tool.c/.h
-    bzero(&run_q, sizeof(run_q));
-    bzero(&unused_q, sizeof(unused_q));
-    bzero(&sleep_q, sizeof(sleep_q));
+    bzero((char *)&run_q, sizeof(run_q));
+    bzero((char *)&unused_q, sizeof(unused_q));
+    bzero((char *)&sleep_q, sizeof(sleep_q));
 
     // Ensure that all processes are initially in our unused queue
     while(run_q.size > 0) dequeue(&run_q);

@@ -19,13 +19,15 @@ void CheckSleep() {
         }
         // If not, add it back to the sleep queue
         else enqueue(pid, &sleep_q);
+    }
+}
 
 void NewProcISR() {
     int pid;
 
     // Check if we have any available (unused) processes
     // If not, "panic" and return
-    if(unused_q.size >= MAX_PROC) {
+    if(unused_q.size > MAX_PROC) {
         cons_printf("Kernel Panic: no more process ID left!");
         return;
     }
@@ -60,6 +62,8 @@ void NewProcISR() {
     pcb[pid].trapframe_p->es = get_es();                     // standard fair
     pcb[pid].trapframe_p->fs = get_fs();                     // standard fair
     pcb[pid].trapframe_p->gs = get_gs();                     // standard fair
+
+       
 }
 
 void ProcExitISR() {
@@ -124,15 +128,15 @@ void GetTimeISR() {
 }
 
 void SleepISR() {
-    int wake_time = system_time + pcb[run_pid].trapframe_p->eax;
     if(run_pid == -1) return;
     // Calculate the wake time for the currently running process
-    
+    pcb[run_pid].wake_time = system_time + pcb[run_pid].trapframe_p->eax;
 	  // Add currently running process to the sleep queue
     enqueue(run_pid, &sleep_q);
 	  // Change the running process state to SLEEP
     pcb[run_pid].state = SLEEP;
 	  // Pull next ready process from the process queue
-    /*This might not be right*/run_pid = dequeue(&run_q);
+
+    /*This might not be right*/run_pid = dequeue(&run_q); //-1 invokes scheduler which does this
 }
 
