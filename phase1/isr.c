@@ -74,7 +74,7 @@ void ProcExitISR() {
     // If the running PID is invalid, panic and set a breakpoint
     if(run_pid == -1) {
         cons_printf("Kernel Panic: No process running\n");
-        //breakpoint();
+        breakpoint();
     }
 
     // Display a message indicating that the process is exiting
@@ -140,8 +140,6 @@ void SleepISR() {
     pcb[run_pid].state = SLEEP;
 	  // Pull next ready process from the process queue
 
-    /*This might not be right*/    
     run_pid = dequeue(&run_q);
-    //Kernel(pcb[run_pid].trapframe_p);
 }
 
