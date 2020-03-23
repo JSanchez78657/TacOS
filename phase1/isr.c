@@ -4,6 +4,8 @@
 #include "tool.h"
 #include "extern.h"
 #include "proc.h"
+#include "main.h"
+#include "entry.h"
 
 void CheckSleep() {
     int i, size, pid;
@@ -27,7 +29,7 @@ void NewProcISR() {
 
     // Check if we have any available (unused) processes
     // If not, "panic" and return
-    if(unused_q.size > MAX_PROC) {
+    if(unused_q.size <= 0) {
         cons_printf("Kernel Panic: no more process ID left!");
         return;
     }
@@ -43,10 +45,10 @@ void NewProcISR() {
     // Move the proces into the run queue
     enqueue(pid, &run_q);
     // Ensure the stack for the process is cleared
-    bzero(stack[pid], sizeof(stack[pid]));
+    bzero(stack[pid], STACK_SIZE);
 
     // Allocate the trapframe data
-    pcb[pid].trapframe_p = (trapframe_t *)&stack[pid][STACK_SIZE - sizeof(trapframe_t)];
+    pcb[pid].trapframe_p = (trapframe_t *)&(stack[pid][STACK_SIZE - sizeof(trapframe_t)]);
 
     // If the PID is 0, this is our init process, otherwise it is a user process
     if (pid == 0) {
@@ -72,7 +74,7 @@ void ProcExitISR() {
     // If the running PID is invalid, panic and set a breakpoint
     if(run_pid == -1) {
         cons_printf("Kernel Panic: No process running\n");
-        breakpoint();
+        //breakpoint();
     }
 
     // Display a message indicating that the process is exiting
@@ -131,12 +133,15 @@ void SleepISR() {
     if(run_pid == -1) return;
     // Calculate the wake time for the currently running process
     pcb[run_pid].wake_time = system_time + pcb[run_pid].trapframe_p->eax;
+    pcb[run_pid].trapframe_p->eax = 0;
 	  // Add currently running process to the sleep queue
     enqueue(run_pid, &sleep_q);
 	  // Change the running process state to SLEEP
     pcb[run_pid].state = SLEEP;
 	  // Pull next ready process from the process queue
 
-    /*This might not be right*/run_pid = dequeue(&run_q); //-1 invokes scheduler which does this
+    /*This might not be right*/    
+    run_pid = dequeue(&run_q);
+    //Kernel(pcb[run_pid].trapframe_p);
 }
 

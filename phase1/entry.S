@@ -8,7 +8,7 @@
 .text
 
 // Loader loads trapframe of a process to CPU registers, to run it
-ENTRY(Loader)
+ENTRY(Loader) 
    movl 4(%esp), %eax   // load stack pointer from eax
    movl %eax, %esp
    popl %gs
@@ -18,6 +18,7 @@ ENTRY(Loader)
    popa                 // restore general registers
    add $4, %esp         // skip 4 bytes that stored intr_num
    iret
+
 
 // push intr type number then jump to common handler
 ENTRY(TimerEntry)

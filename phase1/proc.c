@@ -3,6 +3,7 @@
 #include "proc.h"       // for prototypes of process functions
 #include "syscall.h"    // for system calls
 
+
 // IO_DELAY() should be encapsulated in a loop 1666000 times
 // However, IO_DELAY() delays CPU by 0.65us
 //   -> Therefore, we should loop 1s/0.65us = 1538461.53846 -> 1538462
@@ -23,7 +24,10 @@ void InitProc() {
 void UserProc() {
     int pid = GetPid();
     int sleep_time = pid % 5 + 1;
-    int sys_time = GetTime();
-    cons_printf("Proc: User (pid=%d, sys_time=%d, sleep_delay=%d)\n", pid, sys_time, sleep_time);
-    Sleep(sleep_time);
+    int sys_time;
+	while (1) {
+		sys_time = GetTime();
+    		cons_printf("Proc: User (pid=%d, sys_time=%d, sleep_delay=%d)\n", pid, sys_time, sleep_time);
+    		Sleep(sleep_time);
+	}
 }

@@ -62,6 +62,7 @@ void SetData() {
     
     // State of processes should be UNUSED
     for(i = 0; i < MAX_PROC; ++i) {
+      bzero((char *)&pcb[i], sizeof(pcb_t));
       pcb[i].state = UNUSED;
       enqueue(i, &unused_q);
     }
