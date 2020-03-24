@@ -74,7 +74,7 @@ void ProcExitISR() {
     // If the running PID is invalid, panic and set a breakpoint
     if(run_pid == -1) {
         cons_printf("Kernel Panic: No process running\n");
-        breakpoint();
+        //breakpoint();
     }
 
     // Display a message indicating that the process is exiting
@@ -132,7 +132,7 @@ void GetTimeISR() {
 void SleepISR() {
     if(run_pid == -1) return;
     // Calculate the wake time for the currently running process
-    pcb[run_pid].wake_time = system_time + pcb[run_pid].trapframe_p->eax;
+    pcb[run_pid].wake_time = system_time + (pcb[run_pid].trapframe_p->eax * 100);
     pcb[run_pid].trapframe_p->eax = 0;
 	  // Add currently running process to the sleep queue
     enqueue(run_pid, &sleep_q);
@@ -140,6 +140,8 @@ void SleepISR() {
     pcb[run_pid].state = SLEEP;
 	  // Pull next ready process from the process queue
 
+    /*This might not be right*/    
     run_pid = dequeue(&run_q);
+    //Kernel(pcb[run_pid].trapframe_p);
 }
 
