@@ -130,14 +130,17 @@ void Kernel(trapframe_t *p) {
         case GETPID_INTR:
             GetPidISR();
             // Insert outportb here
+            outportb(0x20, 0x60);
             break;
         case GETTIME_INTR:
             GetTimeISR();
             // Insert outportb here
+            outportb(0x20, 0x60);
             break;
         case SLEEP_INTR:
             SleepISR();
             // Insert outportb here
+            outportb(0x20, 0x60);
             break;
         default:
             cons_printf("Kernel Panic: no such interrupt # (%d)!\n", p->intr_num);
