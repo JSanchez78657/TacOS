@@ -13,6 +13,10 @@ extern int run_pid;
 extern q_t run_q;
 extern q_t unused_q;
 extern q_t sleep_q;
+extern q_t semaphore_q;
+
+// Mailbox 
+extern mbox_t mbox[MAX_PROC];
 
 // process table
 extern pcb_t pcb[MAX_PROC];

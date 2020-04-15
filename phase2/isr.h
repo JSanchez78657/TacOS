@@ -12,5 +12,10 @@ void TimerISR();
 void GetPidISR();
 void GetTimeISR();
 void SleepISR();
+void SemGetISR();
+void SemWaitISR();
+void SemPostISR();
+void MsgSendISR();
+void MsgRecvISR();
 
 #endif

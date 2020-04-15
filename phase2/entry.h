@@ -8,6 +8,11 @@
 #define GETPID_INTR   48
 #define GETTIME_INTR  49
 #define SLEEP_INTR    50
+#define SEMGET_INTR   51
+#define SEMPOST_INTR  52
+#define SEMWAIT_INTR  53
+#define MSGSEND_INTR  54
+#define MSGRESV_INTR  55
 
 #define KCODE 0x08         // kernel's code segment
 #define KDATA 0x10         // kernel's data segment
@@ -17,12 +22,17 @@
 #ifndef ASSEMBLER
 
 __BEGIN_DECLS
-
-extern void TimerEntry();     // code defined in entry.S
-extern void GetPidEntry();    // code defined in entry.S
-extern void GetTimeEntry();   // code defined in entry.S
-extern void SleepEntry();     // code defined in entry.S
-extern void Loader();         // code defined in entry.S
+// code defined in entry.S
+extern void TimerEntry();     
+extern void GetPidEntry();    
+extern void GetTimeEntry();   
+extern void SleepEntry();     
+extern void Loader();
+extern void SemGetEntry();
+extern void SemPostEntry();
+extern void SemWaitEntry();
+extern void MsgSendEntry();
+extern void MsgRecvEntry();        
 
 __END_DECLS
 
