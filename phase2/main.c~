@@ -154,23 +154,6 @@ void Kernel(trapframe_t *p) {
             // Insert outportb here
             outportb(0x20, 0x60);
             break;
-	case SEMGET_INTR:
-	    SemGetISR();
-	    break;
-	case SEMPOST_INTR:
-	    SemPostISR();
-	    break;
-	case SEMWAIT_INTR:
-	    SemWaitISR();
-	    break;
-	case MSGSEND_INTR:
-	    MsgSendISR();
-	    break;
-	case MSGRECV_INTR:
-	    MsgRecvISR();
-	    break;
-
-
         default:
             cons_printf("Kernel Panic: no such interrupt # (%d)!\n", p->intr_num);
             breakpoint();
