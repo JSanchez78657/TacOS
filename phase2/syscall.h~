@@ -10,10 +10,4 @@ int GetTime(void);
 // 1 input, no return
 void Sleep(int);
 
-int SemGet(void);
-void SemPost(int);
-void SemWait(int);
-void MsgSend(int, msg_t *);
-void MsgSend(int, msg_t *);
-
 #endif
