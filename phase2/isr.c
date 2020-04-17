@@ -47,9 +47,13 @@ void NewProcISR() {
     bzero(stack[pid], STACK_SIZE);
     pcb[pid].trapframe_p = (trapframe_t *)&(stack[pid][STACK_SIZE - sizeof(trapframe_t)]);
 
-    // If the PID is 0, this is our init process, otherwise it is a user process
+    // pid [0,1,2] = Init, Printer, Dispatcher
     if (pid == 0) {
-        pcb[pid].trapframe_p->eip = (unsigned int)InitProc;   // InitProc process
+        pcb[pid].trapframe_p->eip = (unsigned int)InitProc;   
+    } else if (pid == 1) {
+        pcb[pid].trapframe_p->eip = (unsigned int)PrinterProc; 
+    } else if (pid == 2) {
+	pcb[pid].trapframe_p->eip = (unsigned int)DispatcherProc;
     } else {
         pcb[pid].trapframe_p->eip = (unsigned int)UserProc;   // other processes
     }
