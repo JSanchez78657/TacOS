@@ -37,6 +37,8 @@ int main() {
     SetControl(); //Init IDT
 
     NewProcISR(); //Init Procs
+    NewProcISR(); //PrinterProc
+    NewProcISR(); //DispatcherProc
 
     // Run initial scheduler & Loader
     Scheduler();

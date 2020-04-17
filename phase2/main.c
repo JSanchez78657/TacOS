@@ -75,6 +75,8 @@ void SetData() {
       bzero((char *)&pcb[i], sizeof(pcb_t));
       pcb[i].state = UNUSED;
       enqueue(i, &unused_q);
+      enqueue(i, &semaphore_q);
+      
     }
 
     // Initiallize the running pid so the schedule will kick in

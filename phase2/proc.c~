@@ -28,14 +28,9 @@ void UserProc() {
     int pid = GetPid();
     int sleep_time = pid % 5 + 1;
     int sys_time;
-    msg_t *writeMsg;
     cons_printf("UserProc Starting\n");
 	while (1) {
 		sys_time = GetTime();
-		writeMsg->time_stamp = sys_time;
-		writeMsg->data = sys_time;
-		writeMsg->sender = pid;
-		MsgSend(1,writeMsg);
     		Sleep(sleep_time);
 	}
 }

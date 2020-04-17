@@ -36,10 +36,16 @@ typedef struct {
 } q_t;
 
 typedef struct {
+  int id;
   int count;                 // access count
   q_t wait_q;                // waiting processes
 } semaphore_t;
 
+typedef struct {
+    int sender;              // sending process PID
+    int time_stamp;          // time sent
+    int data;                // just an integer for now
+} msg_t;
 
 typedef struct {
   msg_t msg[MBOX_SIZE];      // mailbox size (max number of messages)
