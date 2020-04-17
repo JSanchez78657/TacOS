@@ -32,9 +32,9 @@ void UserProc() {
     cons_printf("UserProc Starting\n");
 	while (1) {
 		sys_time = GetTime();
-		writeMsg->time_stamp = sys_time;
+		writeMsg->time_stamp = sys_time; //should this be filled here or ISR
 		writeMsg->data = sys_time;
-		writeMsg->sender = pid;
+		writeMsg->sender = pid; //should this be filled here or ISR
 		MsgSend(1,writeMsg);
     		Sleep(sleep_time);
 	}
