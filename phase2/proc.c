@@ -12,9 +12,9 @@
 void InitProc() {
     int i;
 
-    while (1) {
-        cons_printf("Init runs\n");
+    cons_printf("InitProc started\n");
 
+    while (1) {
         for (i = 0; i < DELAY_SECOND; i++) {
             IO_DELAY();
         }
@@ -25,9 +25,10 @@ void UserProc() {
     int pid = GetPid();
     int sleep_time = pid % 5 + 1;
     int sys_time;
-	while (1) {
-		sys_time = GetTime();
+    cons_printf("UserProc started\n");
+  	while (1) {
+	    	sys_time = GetTime();
     		cons_printf("Proc: User (pid=%d, sys_time=%d, sleep_delay=%d)\n", pid, sys_time, sleep_time);
     		Sleep(sleep_time);
-	}
+  	}
 }
