@@ -31,7 +31,7 @@ void UserProc() {
     cons_printf("UserProc Starting\n");
 	  while (1) {
 		    sys_time = GetTime();
-		    writeMsg->time_stamp = sys_time //should this be filled here or ISR
+		    writeMsg->time_stamp = sys_time; //should this be filled here or ISR
     		writeMsg->data = sys_time;
      		writeMsg->sender = pid; //should this be filled here or ISR
     		MsgSend(1,writeMsg);
@@ -40,29 +40,30 @@ void UserProc() {
 }
 
 void PrinterProc() {
-	cons_printf("PrinterProc Starting\n");
-	int sem = semGet();
+	int sem = SemGet();
 	int readMem;
+	cons_printf("PrinterProc Starting\n");
 	while (1) {
-		semWait(0);
+		SemWait(0);
 		readMem = sharedData;
 		cons_printf("Printer Read %d\n", sharedData);
-		semPost(0);
+		SemPost(0);
 		Sleep(5);
 	}
 		
 }
 
 void DispatcherProc() {
-	cons_printf("DispatcherProc Starting\n");
-	int sem = semGet();
+	int sem = SemGet();
 	msg_t *readMsg;
 
+	cons_printf("DispatcherProc Starting\n");
 	while (1) {
 		MsgRecv(1, readMsg);
-		semWait(0);
+		SemWait(0);
 		sharedData = readMsg->data;
-		cons_printf("Dispatcher Wrote %d\n",sharedData); 			semPost(0);
+		cons_printf("Dispatcher Wrote %d\n",sharedData);
+    SemPost(0);
 	}
 
 }

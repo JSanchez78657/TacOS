@@ -1,3 +1,4 @@
+#include "type.h"
 #include "syscall.h"
 
 int GetPid() {                    // no input, has return

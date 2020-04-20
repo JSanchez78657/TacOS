@@ -53,7 +53,7 @@ typedef struct {
   int tail;                  // queue tail
   int size;                  // queue size
   q_t wait_q;                // waiting processes
-} mbox_t
+} mbox_t;
 
 typedef void (*func_ptr_t)(); // void-return function pointer type
 

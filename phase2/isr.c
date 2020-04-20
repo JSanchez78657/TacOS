@@ -161,8 +161,9 @@ void SemGetISR() {
 }
 
 void SemWaitISR() {
+  semaphore_t sem;
   if(run_pid == -1) return;
-  semaphore_t sem = semaphore[pcb[run_pid].trapframe_p->eax];
+  sem = semaphore[pcb[run_pid].trapframe_p->eax];
   // Enqueue a process to the semaphore's wait queue if the semaphore is held
   if(sem.count > 0) {
     enqueue(run_pid, &sem.wait_q);
@@ -174,25 +175,30 @@ void SemWaitISR() {
 }
 
 void SemPostISR() {
+  semaphore_t sem;
+  int proc_id;
+  int sem_id;
   if(run_pid == -1) return;
-  semaphore_t sem = semaphore[pcb[run_pid].trapframe_p->eax];
-  int id;
+  sem_id = pcb[run_pid].trapframe_p->eax;
+  sem = semaphore[sem_id];
   // If a process is in the semaphore's wait queue, enqueue it back to the running queue
   if(sem.wait_q.size > 0) {
-    id = dequeue(&sem.wait_q);
-    pcb[id].state = READY;
-    enqueue(id, &run_q);
+    proc_id = dequeue(&sem.wait_q);
+    pcb[proc_id].state = READY;
+    enqueue(proc_id, &run_q);
   }
   // Decrement the semaphore access count (hint: what happens if the count < 0?)
   --sem.count;
-  if(sem.count < 0) enqueue(sem, &semaphore);
+  if(sem.count < 0) enqueue(sem_id, &semaphore_q);
 }
 
 void MsgSendISR() {
-  if(run_pid == -1) return;
-  mbox_t mailbox = mbox[pcb[run_pid].trapframe_p->eax];
-  msg_t message = pcb[run_pid].trapframe_p->ebx;
+  mbox_t mailbox;
+  msg_t* message;
   int proc_id;
+  if(run_pid == -1) return;
+  mailbox = mbox[pcb[run_pid].trapframe_p->eax];
+  message = (msg_t*) pcb[run_pid].trapframe_p->ebx;
   // If a process is waiting:
   if(mailbox.wait_q.size > 0) {
     // a. Dequeue it, move it to the running queue
@@ -200,18 +206,20 @@ void MsgSendISR() {
     pcb[proc_id].state = READY;
     enqueue(proc_id, &run_q);
     // b. Update the message pointer so the process in MsgRecvISR() can process it
+    pcb[proc_id].trapframe_p->ebx = (unsigned int) message;
   }
   // Enqueue the message to the queue if no process is waiting
   else msg_enqueue(message, &mailbox.msg);
 }
 
 void MsgRecvISR() {
-  if(run_pid == -1) return;
-  mbox_t mailbox = mbox[pcb[run_pid].trapframe_p->eax];
+  mbox_t mailbox;
   msg_t* message;
+  if(run_pid == -1) return;
+  mailbox = mbox[pcb[run_pid].trapframe_p->eax];
   // Dequeue a message from the message queue if one exists and return it to the user
   message = msg_dequeue(&mailbox);
-  if(message != NULL) pcb[run_pid].trapframe_p->ebx = message;
+  if(message != NULL) pcb[run_pid].trapframe_p->ebx = (unsigned int) message;
   // If there is no message in the queue, move the process to the wait queue
   else {
     pcb[run_pid].state = WAITING;

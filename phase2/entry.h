@@ -12,7 +12,7 @@
 #define SEMPOST_INTR  52
 #define SEMWAIT_INTR  53
 #define MSGSEND_INTR  54
-#define MSGRESV_INTR  55
+#define MSGRECV_INTR  55
 
 #define KCODE 0x08         // kernel's code segment
 #define KDATA 0x10         // kernel's data segment

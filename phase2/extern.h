@@ -24,4 +24,7 @@ extern pcb_t pcb[MAX_PROC];
 // runtime stacks of processes
 extern char stack[MAX_PROC][STACK_SIZE];
 
+// semaphore arr
+extern semaphore_t semaphore[MAX_PROC];
+
 #endif
