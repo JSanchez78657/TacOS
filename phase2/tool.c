@@ -13,6 +13,7 @@ void enqueue(int pid, q_t *p) {
     // Returns and display error if queue is full
     if (p->size == Q_SIZE) {
         cons_printf("Error: Queue is full\n");
+	cons_printf("Attempting to enqueue %d\n", pid);
         return;
     }
 

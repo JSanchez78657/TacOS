@@ -143,7 +143,6 @@ void SleepISR() {
 
     /*This might not be right*/    
     run_pid = -1;
-    //Kernel(pcb[run_pid].trapframe_p);
 }
 
 void SemGetISR() {
@@ -172,6 +171,7 @@ void SemWaitISR() {
   }
   // Increment the semaphore access count
   ++sem.count;
+  semaphore[pcb[run_pid].trapframe_p->eax] = sem;
 }
 
 void SemPostISR() {
@@ -189,6 +189,7 @@ void SemPostISR() {
   }
   // Decrement the semaphore access count (hint: what happens if the count < 0?)
   --sem.count;
+  semaphore[pcb[run_pid].trapframe_p->eax] = sem;
   if(sem.count < 0) enqueue(sem_id, &semaphore_q);
 }
 
@@ -210,6 +211,8 @@ void MsgSendISR() {
   }
   // Enqueue the message to the queue if no process is waiting
   else msg_enqueue(message, &mailbox);
+
+  mbox[pcb[run_pid].trapframe_p->eax] = mailbox;
 }
 
 void MsgRecvISR() {
@@ -219,6 +222,8 @@ void MsgRecvISR() {
   mailbox = mbox[pcb[run_pid].trapframe_p->eax];
   // Dequeue a message from the message queue if one exists and return it to the user
   message = msg_dequeue(&mailbox);
+  mbox[pcb[run_pid].trapframe_p->eax] = mailbox;
+
   if(message != NULL) pcb[run_pid].trapframe_p->ebx = (unsigned int) message;
   // If there is no message in the queue, move the process to the wait queue
   else {
@@ -226,4 +231,6 @@ void MsgRecvISR() {
     enqueue(run_pid, &mailbox.wait_q);
     run_pid = -1;
   }
+
+  
 }

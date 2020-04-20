@@ -45,7 +45,7 @@ int SemGet(void) {		 // no input, has return
 
 void SemWait(int semID) { // has input, no return
 
-    asm("movl %0, %%eax; int $52"
+    asm("movl %0, %%eax; int $53"
         :                         
         : "g" (semID)     
         : "eax");               
@@ -54,7 +54,7 @@ void SemWait(int semID) { // has input, no return
 
 void SemPost(int semID) { // has input, no return
 
-    asm("movl %0, %%eax; int $53"
+    asm("movl %0, %%eax; int $52"
         :                         
         : "g" (semID)     
         : "eax");               
