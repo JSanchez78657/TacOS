@@ -209,7 +209,7 @@ void MsgSendISR() {
     pcb[proc_id].trapframe_p->ebx = (unsigned int) message;
   }
   // Enqueue the message to the queue if no process is waiting
-  else msg_enqueue(message, &mailbox.msg);
+  else msg_enqueue(message, &mailbox);
 }
 
 void MsgRecvISR() {

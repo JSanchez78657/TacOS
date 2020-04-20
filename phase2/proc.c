@@ -40,30 +40,31 @@ void UserProc() {
 }
 
 void PrinterProc() {
-	int sem = SemGet();
+	int sem = SemGet(); // need the kernel support for sem 0
 	int readMem;
+	sem = 0;
 	cons_printf("PrinterProc Starting\n");
 	while (1) {
-		SemWait(0);
+		SemWait(sem);
 		readMem = sharedData;
 		cons_printf("Printer Read %d\n", sharedData);
-		SemPost(0);
+		SemPost(sem);
 		Sleep(5);
 	}
 		
 }
 
 void DispatcherProc() {
-	int sem = SemGet();
+	int sem = SemGet(); // need the kernel support for sem 0
 	msg_t *readMsg;
-
+	sem = 0;
 	cons_printf("DispatcherProc Starting\n");
 	while (1) {
 		MsgRecv(1, readMsg);
-		SemWait(0);
+		SemWait(sem);
 		sharedData = readMsg->data;
 		cons_printf("Dispatcher Wrote %d\n",sharedData);
-    SemPost(0);
+    		SemPost(sem);
 	}
 
 }
