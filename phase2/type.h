@@ -5,7 +5,7 @@
 
 #define T_SLICE 100          // max timer ticks in 1 run
 #define MAX_PROC 20          // max number of processes
-#define MBOX_SIZE MAX_PROC
+#define MBOX_SIZE MAX_PROC * 5    // 5 messages per process
 #define Q_SIZE MAX_PROC      // queuing capacity; always ensure we have enough for our processes
 #define STACK_SIZE 8196      // process runtime stack in bytes
 
@@ -14,7 +14,8 @@ typedef enum {
     UNUSED,
     READY,
     RUN,
-    SLEEP
+    SLEEP,
+    WAITING
     // Add additional states
 } state_t;
 

@@ -37,6 +37,26 @@ ENTRY(SleepEntry)
    pushl $SLEEP_INTR
    jmp CommonRoutine
 
+ENTRY(SemGetEntry)
+   pushl $SEMGET_INTR
+   jmp CommonRoutine
+
+ENTRY(SemWaitEntry)
+   pushl $SEMWAIT_INTR
+   jmp CommonRoutine
+
+ENTRY(SemPostEntry)
+   pushl $SEMPOST_INTR
+   jmp CommonRoutine
+
+ENTRY(MsgSendEntry)
+   pushl $MSGSEND_INTR
+   jmp CommonRoutine
+
+ENTRY(MsgRecvEntry)
+   pushl $MSGRECV_INTR
+   jmp CommonRoutine
+
 // Common IRQ entry, save context and call Kernel()
 CommonRoutine:
    pusha

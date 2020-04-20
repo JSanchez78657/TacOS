@@ -3,5 +3,7 @@
 
 void InitProc();
 void UserProc();
+void PrinterProc();
+void DispatcherProc();
 
 #endif

@@ -33,26 +33,27 @@ void NewProcISR() {
         cons_printf("Kernel Panic: no more process ID left!");
         return;
     }
-    // Dequeue the process from the unused queue
+    
+
+    // Dequeue & Initialize
     pid = dequeue(&unused_q);
-    // Set the process state to READY
     pcb[pid].state = READY;
-    // Initialize other process control block variables
     pcb[pid].time = 0;
     pcb[pid].total_time = 0;
     pcb[pid].wake_time = 0;
-
-    // Move the proces into the run queue
     enqueue(pid, &run_q);
-    // Ensure the stack for the process is cleared
-    bzero(stack[pid], STACK_SIZE);
 
-    // Allocate the trapframe data
+    // Setup PCB
+    bzero(stack[pid], STACK_SIZE);
     pcb[pid].trapframe_p = (trapframe_t *)&(stack[pid][STACK_SIZE - sizeof(trapframe_t)]);
 
-    // If the PID is 0, this is our init process, otherwise it is a user process
+    // pid [0,1,2] = Init, Printer, Dispatcher
     if (pid == 0) {
-        pcb[pid].trapframe_p->eip = (unsigned int)InitProc;   // InitProc process
+        pcb[pid].trapframe_p->eip = (unsigned int)InitProc;   
+    } else if (pid == 1) {
+        pcb[pid].trapframe_p->eip = (unsigned int)PrinterProc; 
+    } else if (pid == 2) {
+	pcb[pid].trapframe_p->eip = (unsigned int)DispatcherProc;
     } else {
         pcb[pid].trapframe_p->eip = (unsigned int)UserProc;   // other processes
     }
@@ -141,7 +142,80 @@ void SleepISR() {
 	  // Pull next ready process from the process queue
 
     /*This might not be right*/    
-    run_pid = dequeue(&run_q);
+    run_pid = -1;
     //Kernel(pcb[run_pid].trapframe_p);
 }
 
+void SemGetISR() {
+  // Dequeue a semaphore from the semaphore queue
+  int sem_id = dequeue(&semaphore_q);
+  semaphore_t sem;
+  // If the semaphore is valid, ensure that the semaphore data is initialized
+  if(sem_id != -1) {
+    sem = semaphore[sem_id];
+    sem.count = 0;
+    while(dequeue(&sem.wait_q) != -1);
+  }
+  // Return the semaphore ID to the caller
+  pcb[run_pid].trapframe_p->eax = sem_id;
+}
+
+void SemWaitISR() {
+  if(run_pid == -1) return;
+  semaphore_t sem = semaphore[pcb[run_pid].trapframe_p->eax];
+  // Enqueue a process to the semaphore's wait queue if the semaphore is held
+  if(sem.count > 0) {
+    enqueue(run_pid, &sem.wait_q);
+    pcb[run_pid].state = WAITING;
+    run_pid = -1;
+  }
+  // Increment the semaphore access count
+  ++sem.count;
+}
+
+void SemPostISR() {
+  if(run_pid == -1) return;
+  semaphore_t sem = semaphore[pcb[run_pid].trapframe_p->eax];
+  int id;
+  // If a process is in the semaphore's wait queue, enqueue it back to the running queue
+  if(sem.wait_q.size > 0) {
+    id = dequeue(&sem.wait_q);
+    pcb[id].state = READY;
+    enqueue(id, &run_q);
+  }
+  // Decrement the semaphore access count (hint: what happens if the count < 0?)
+  --sem.count;
+  if(sem.count < 0) enqueue(sem, &semaphore);
+}
+
+void MsgSendISR() {
+  if(run_pid == -1) return;
+  mbox_t mailbox = mbox[pcb[run_pid].trapframe_p->eax];
+  msg_t message = pcb[run_pid].trapframe_p->ebx;
+  int proc_id;
+  // If a process is waiting:
+  if(mailbox.wait_q.size > 0) {
+    // a. Dequeue it, move it to the running queue
+    proc_id = dequeue(&mailbox.wait_q);
+    pcb[proc_id].state = READY;
+    enqueue(proc_id, &run_q);
+    // b. Update the message pointer so the process in MsgRecvISR() can process it
+  }
+  // Enqueue the message to the queue if no process is waiting
+  else msg_enqueue(message, &mailbox.msg);
+}
+
+void MsgRecvISR() {
+  if(run_pid == -1) return;
+  mbox_t mailbox = mbox[pcb[run_pid].trapframe_p->eax];
+  msg_t* message;
+  // Dequeue a message from the message queue if one exists and return it to the user
+  message = msg_dequeue(&mailbox);
+  if(message != NULL) pcb[run_pid].trapframe_p->ebx = message;
+  // If there is no message in the queue, move the process to the wait queue
+  else {
+    pcb[run_pid].state = WAITING;
+    enqueue(run_pid, &mailbox.wait_q);
+    run_pid = -1;
+  }
+}

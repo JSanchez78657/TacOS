@@ -22,18 +22,23 @@ pcb_t pcb[MAX_PROC];
 // runtime stacks of processes
 char stack[MAX_PROC][STACK_SIZE];
 
+// IPC
+mbox_t mbox[MAX_PROC];
+semaphore_t semaphore[MAX_PROC];
+q_t semaphore_q;
+
+
 // Interrupt descriptor table
 struct i386_gate *idt_p;
 
 int main() {
-    // Set the kernel data
-    SetData();
+    SetData(); //Init Kernel data
 
-    // Initialize the IDT
-    SetControl();
+    SetControl(); //Init IDT
 
-    // Create InitProc
-    NewProcISR();
+    NewProcISR(); //Init Procs
+    NewProcISR(); //PrinterProc
+    NewProcISR(); //DispatcherProc
 
     // Run initial scheduler & Loader
     Scheduler();
@@ -56,6 +61,11 @@ void SetData() {
     bzero((char *)&run_q, sizeof(run_q));
     bzero((char *)&unused_q, sizeof(unused_q));
     bzero((char *)&sleep_q, sizeof(sleep_q));
+    bzero((char *)&semaphore_q, sizeof(semaphore_q));
+
+    // Ensure IPC data is initialized to zero
+    bzero((char *)&mbox, sizeof(mbox));
+    bzero((char *)&semaphore, sizeof(semaphore));
 
     // Ensure that all processes are initially in our unused queue
     while(run_q.size > 0) dequeue(&run_q);
@@ -65,11 +75,12 @@ void SetData() {
       bzero((char *)&pcb[i], sizeof(pcb_t));
       pcb[i].state = UNUSED;
       enqueue(i, &unused_q);
+      enqueue(i, &semaphore_q);
+      
     }
 
     // Initiallize the running pid so the schedule will kick in
     run_pid = -1;
-    // Initialize system time to 0
     system_time = 0;
 }
 
@@ -80,8 +91,13 @@ void SetControl() {
     // Add en entry for each interrupt into the IDT
     SetEntry(TIMER_INTR, TimerEntry);
     SetEntry(GETPID_INTR, GetPidEntry);
-	  SetEntry(GETTIME_INTR, GetTimeEntry);
-  	SetEntry(SLEEP_INTR, SleepEntry);
+    SetEntry(GETTIME_INTR, GetTimeEntry);
+    SetEntry(SLEEP_INTR, SleepEntry);
+    SetEntry(SEMGET_INTR, SemGetEntry);
+    SetEntry(SEMPOST_INTR, SemPostEntry);
+    SetEntry(SEMWAIT_INTR, SemWaitEntry);
+    SetEntry(MSGSEND_INTR, MsgSendEntry);
+    SetEntry(MSGRECV_INTR, MsgRecvEntry);
 
     // Clear the PIC mask
     outportb(0x21, ~1);
@@ -142,6 +158,23 @@ void Kernel(trapframe_t *p) {
             // Insert outportb here
             outportb(0x20, 0x60);
             break;
+	case SEMGET_INTR:
+	    SemGetISR();
+	    break;
+	case SEMPOST_INTR:
+	    SemPostISR();
+	    break;
+	case SEMWAIT_INTR:
+	    SemWaitISR();
+	    break;
+	case MSGSEND_INTR:
+	    MsgSendISR();
+	    break;
+	case MSGRECV_INTR:
+	    MsgRecvISR();
+	    break;
+
+
         default:
             cons_printf("Kernel Panic: no such interrupt # (%d)!\n", p->intr_num);
             breakpoint();
