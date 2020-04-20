@@ -34,7 +34,7 @@ void Sleep(int sleep_seconds) {   // has input, no return
 int SemGet(void) {		 // no input, has return
     int semID;
 
-    asm("int 51; movl %%eax, %0"
+    asm("int $51; movl %%eax, %0"
 	: "=g" (semID)
 	:
 	: "eax"
@@ -61,20 +61,20 @@ void SemPost(int semID) { // has input, no return
 
 }
 
-void MsgSend(int mbox, msg_t *msg) { // has input, no return
+void MsgSend(int mbox, void *msg) { // has input, no return
 
     asm("movl %0, %%eax; movl %1, %%ebx; int $54"
         :                         
-        : "g" (mbox), "g" (msg)     
+        : "g" (mbox), "g" ((int)msg)     
         : "eax", "ebx");               
 
 }
 
-void MsgRecv(int mbox, msg_t *msg) { // has input, no return
+void MsgRecv(int mbox, void *msg) { // has input, no return
 
     asm("movl %0, %%eax; movl %1, %%ebx; int $55"
         :                         
-        : "g" (mbox), "g" (msg)     
+        : "g" (mbox), "g" ((int)msg)     
         : "eax", "ebx");               
 
 }
