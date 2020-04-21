@@ -13,7 +13,7 @@ void Sleep(int);
 int SemGet(void);
 void SemPost(int);
 void SemWait(int);
-void MsgSend(int, void*);
-void MsgRecv(int, void*);
+void MsgSend(int, msg_t*);
+void MsgRecv(int, msg_t*);
 
 #endif

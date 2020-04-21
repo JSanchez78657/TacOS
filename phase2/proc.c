@@ -62,7 +62,7 @@ void DispatcherProc() {
 	while (1) {
 		MsgRecv(1, readMsg);
 		SemWait(sem);
-		sharedData = readMsg->data;
+		sharedData = &readMsg->data;
 		cons_printf("Dispatcher Wrote %d\n",sharedData);
     		SemPost(sem);
 	}

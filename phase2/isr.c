@@ -216,19 +216,19 @@ void MsgSendISR() {
 }
 
 void MsgRecvISR() {
-  mbox_t mailbox;
+  mbox_t *mailbox;
   msg_t* message;
   if(run_pid == -1) return;
-  mailbox = mbox[pcb[run_pid].trapframe_p->eax];
+  mailbox = &mbox[pcb[run_pid].trapframe_p->eax];
   // Dequeue a message from the message queue if one exists and return it to the user
-  message = msg_dequeue(&mailbox);
-  mbox[pcb[run_pid].trapframe_p->eax] = mailbox;
+  message = msg_dequeue(mailbox);
+ 
 
   if(message != NULL) pcb[run_pid].trapframe_p->ebx = (unsigned int) message;
   // If there is no message in the queue, move the process to the wait queue
   else {
     pcb[run_pid].state = WAITING;
-    enqueue(run_pid, &mailbox.wait_q);
+    enqueue(run_pid, &(mailbox->wait_q));
     run_pid = -1;
   }
 
