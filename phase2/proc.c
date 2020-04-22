@@ -44,13 +44,11 @@ void UserProc() {
 void PrinterProc() {
 	int sem = SemGet(); // need the kernel support for sem 0
   int pid = GetPid();
-	int readMem;
   int time;
 	sem = 0; //synchronize sempahores
 	cons_printf("Printer started\n");
 	while (1) {
 		SemWait(sem);
-		readMem = sharedData;
     time = GetTime();
 		cons_printf("PID %d Printer read shared memory = %d at %d\n", pid, sharedData, time);
 		SemPost(sem);

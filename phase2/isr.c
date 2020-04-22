@@ -148,71 +148,73 @@ void SleepISR() {
 void SemGetISR() {
   // Dequeue a semaphore from the semaphore queue
   int sem_id = dequeue(&semaphore_q);
-  semaphore_t sem;
+  semaphore_t* sem;
   // If the semaphore is valid, ensure that the semaphore data is initialized
   if(sem_id != -1) {
-    sem = semaphore[sem_id];
-    sem.count = 0;
-    while(dequeue(&sem.wait_q) != -1);
+    sem = &semaphore[sem_id];
+    sem->count = 0;
+    while(dequeue(&sem->wait_q) != -1);
   }
   // Return the semaphore ID to the caller
   pcb[run_pid].trapframe_p->eax = sem_id;
 }
 
 void SemWaitISR() {
-  semaphore_t sem;
+  semaphore_t* sem;
+  int sem_id;
   if(run_pid == -1) return;
-  sem = semaphore[pcb[run_pid].trapframe_p->eax];
+  sem_id = pcb[run_pid].trapframe_p->eax;
+  sem = &semaphore[sem_id];
   // Enqueue a process to the semaphore's wait queue if the semaphore is held
-  if(sem.count > 0) {
-    enqueue(run_pid, &sem.wait_q);
+  if(sem->count > 0) {
+    enqueue(run_pid, &sem->wait_q);
     pcb[run_pid].state = WAITING;
     run_pid = -1;
   }
   // Increment the semaphore access count
-  ++sem.count;
-  semaphore[pcb[run_pid].trapframe_p->eax] = sem;
+  ++sem->count;
+//  semaphore[pcb[run_pid].trapframe_p->eax] = sem;
 }
 
 void SemPostISR() {
-  semaphore_t sem;
+  semaphore_t* sem;
   int proc_id;
   int sem_id;
   if(run_pid == -1) return;
   sem_id = pcb[run_pid].trapframe_p->eax;
-  sem = semaphore[sem_id];
+  sem = &semaphore[sem_id];
   // If a process is in the semaphore's wait queue, enqueue it back to the running queue
-  if(sem.wait_q.size > 0) {
-    proc_id = dequeue(&sem.wait_q);
+  if(sem->wait_q.size > 0) {
+    proc_id = dequeue(&sem->wait_q);
     pcb[proc_id].state = READY;
     enqueue(proc_id, &run_q);
   }
   // Decrement the semaphore access count (hint: what happens if the count < 0?)
-  --sem.count;
-  semaphore[pcb[run_pid].trapframe_p->eax] = sem;
-  if(sem.count < 0) enqueue(sem_id, &semaphore_q);
+  --sem->count;
+//  semaphore[pcb[run_pid].trapframe_p->eax] = sem;
+  if(sem->count < 0) enqueue(sem_id, &semaphore_q);
 }
 
 void MsgSendISR() {
-  mbox_t mailbox;
+  mbox_t* mailbox;
   msg_t* message;
   int proc_id;
   if(run_pid == -1) return;
-  mailbox = mbox[pcb[run_pid].trapframe_p->eax];
+  mailbox = &mbox[pcb[run_pid].trapframe_p->eax];
   message = (msg_t *)pcb[run_pid].trapframe_p->ebx;
   // If a process is waiting:
-  if(mailbox.wait_q.size > 0) {
+  if(mailbox->wait_q.size > 0) {
     // a. Dequeue it, move it to the running queue
-    proc_id = dequeue(&mailbox.wait_q);
+    proc_id = dequeue(&mailbox->wait_q);
     pcb[proc_id].state = READY;
     enqueue(proc_id, &run_q);
     // b. Update the message pointer so the process in MsgRecvISR() can process it
-    pcb[proc_id].trapframe_p->ebx = (int ) message;
+    pcb[proc_id].trapframe_p->ebx = (int) message;
   }
   // Enqueue the message to the queue if no process is waiting
-  else msg_enqueue(message, &mailbox);
+  else msg_enqueue(message, mailbox);
 
-  mbox[pcb[run_pid].trapframe_p->eax] = mailbox;
+//  mbox[pcb[run_pid].trapframe_p->eax] = mailbox;
 }
 
 void MsgRecvISR() {
@@ -231,6 +233,4 @@ void MsgRecvISR() {
     enqueue(run_pid, &(mailbox->wait_q));
     run_pid = -1;
   }
-
-  
 }
