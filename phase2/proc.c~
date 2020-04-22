@@ -35,7 +35,7 @@ void UserProc() {
     		writeMsg.data = sys_time;
      		writeMsg.sender = pid; //should this be filled here or ISR
 		cons_printf("User proc sending addres: %d\n", &writeMsg);    	
-		MsgSend(1,&writeMsg);
+		MsgSend(1,(char *)&writeMsg);
     		Sleep(sleep_time);
   	}
 }
@@ -61,7 +61,7 @@ void DispatcherProc() {
 	sem = 0; //synchronize semaphores
 	cons_printf("DispatcherProc Starting\n");
 	while (1) {
-		MsgRecv(1, &readMsg);
+		MsgRecv(1, (char *)&readMsg);
 		SemWait(sem);
 		sharedData = readMsg.data;
 		cons_printf("Dispatcher Wrote %d\n",sharedData);

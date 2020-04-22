@@ -61,7 +61,7 @@ void SemPost(int semID) { // has input, no return
 
 }
 
-void MsgSend(int mbox, msg_t *msg) { // has input, no return
+void MsgSend(int mbox, char *msg) { // has input, no return
 
     asm("movl %0, %%eax; movl %1, %%ebx; int $54"
         :                         
@@ -70,7 +70,7 @@ void MsgSend(int mbox, msg_t *msg) { // has input, no return
 
 }
 
-void MsgRecv(int mbox, msg_t *msg) { // has input, no return
+void MsgRecv(int mbox, char *msg) { // has input, no return
 
     asm("movl %0, %%eax; movl %1, %%ebx; int $55; movl %%ebx, %1"
         :                         
