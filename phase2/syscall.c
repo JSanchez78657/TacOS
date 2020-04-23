@@ -1,5 +1,6 @@
 #include "type.h"
 #include "syscall.h"
+#include "spede.h"
 
 int GetPid() {                    // no input, has return
     int x;
@@ -70,11 +71,15 @@ void MsgSend(int idx, msg_t *msg) { // has input, no return
 }
 
 void MsgRecv(int mbox, msg_t *msg) { // has input, no return
+    msg_t *pointer;
 
-    asm("movl %0, %%eax; movl %1, %%ebx; int $55; movl %%ebx, %1;"
-        :                         
+    asm("movl %1, %%eax; movl %2, %%ebx; int $55; movl %%ebx, %0;"
+        : "=g" ((int)pointer)                        
         : "g" (mbox), "g" ((int)msg)     
-        : "eax", "ebx");               
+        : "eax", "ebx");
+
+    cons_printf("syscall received %d from %d\n", pointer->data, pointer->sender);
+    msg = pointer;
 
 }
 
