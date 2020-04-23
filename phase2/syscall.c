@@ -71,14 +71,12 @@ void MsgSend(int idx, msg_t *msg) { // has input, no return
 }
 
 void MsgRecv(int mbox, msg_t *msg) { // has input, no return
-    msg_t *pointer;
 
-    asm("movl %1, %%eax; movl %2, %%ebx; int $55; movl %%ebx, %0;"
-        : "=g" ((int)pointer)                        
+    asm("movl %0, %%eax; movl %1, %%ebx; int $55; movl %%ebx, %1;"
+        :                         
         : "g" (mbox), "g" ((int)msg)     
         : "eax", "ebx");
 
-    msg = pointer;
 
 }
 
