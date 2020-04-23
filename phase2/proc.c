@@ -27,7 +27,7 @@ void UserProc() {
     int pid = GetPid();
     int sleep_time = pid % 5 + 1;
     int sys_time;
-    int mailbox = 1;
+    int mailbox = 0;
     msg_t writeMsg;
     cons_printf("UserProc Starting\n");
 	  while (1) {
@@ -36,7 +36,7 @@ void UserProc() {
     		writeMsg.data = sys_time;
      		writeMsg.sender = pid; //should this be filled here or ISR
 		    cons_printf("PID %d UserProc sending msg.data = %d to mbox %d at %d\n", pid, writeMsg.data, mailbox, sys_time);
-    		MsgSend(mailbox,&writeMsg);
+    		MsgSend(mailbox, &writeMsg);
     		Sleep(sleep_time);
   	}
 }
@@ -61,7 +61,7 @@ void DispatcherProc() {
 	int sem = SemGet(); // need the kernel support for sem 0
   int pid = GetPid();
   int time;
-  int mailbox = 1;
+  int mailbox = 0;
 	msg_t readMsg;
 	sem = 0; //synchronize semaphores
 	cons_printf("Dispatcher started\n");

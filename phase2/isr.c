@@ -207,14 +207,12 @@ void MsgSendISR() {
     // a. Dequeue it, move it to the running queue
     proc_id = dequeue(&mailbox->wait_q);
     pcb[proc_id].state = READY;
-    pcb[proc_id].trapframe_p->ebx = (int)message;
     enqueue(proc_id, &run_q);
     // b. Update the message pointer so the process in MsgRecvISR() can process it
+    *(msg_t *) pcb[proc_id].trapframe_p->ebx = *message;
   }
   // Enqueue the message to the queue if no process is waiting
   else msg_enqueue(message, mailbox);
-
-//  mbox[pcb[run_pid].trapframe_p->eax] = mailbox;
 }
 
 void MsgRecvISR() {

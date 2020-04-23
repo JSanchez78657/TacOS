@@ -78,7 +78,6 @@ void MsgRecv(int mbox, msg_t *msg) { // has input, no return
         : "g" (mbox), "g" ((int)msg)     
         : "eax", "ebx");
 
-    cons_printf("syscall received %d from %d\n", pointer->data, pointer->sender);
     msg = pointer;
 
 }
