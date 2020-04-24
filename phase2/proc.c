@@ -11,6 +11,7 @@
 
 
 int sharedData = -1;
+int printer_dispatch_sem = -1;
 
 void InitProc() {
     int i;
@@ -42,37 +43,35 @@ void UserProc() {
 }
 
 void PrinterProc() {
-	int sem = SemGet(); // need the kernel support for sem 0
   int pid = GetPid();
   int time;
-	sem = 0; //synchronize sempahores
+  if(printer_dispatch_sem == -1) printer_dispatch_sem = SemGet();
 	cons_printf("Printer started\n");
 	while (1) {
-		SemWait(sem);
+		SemWait(printer_dispatch_sem);
     time = GetTime();
 		cons_printf("PID %d Printer read shared memory = %d at %d\n", pid, sharedData, time);
-		SemPost(sem);
+		SemPost(printer_dispatch_sem);
 		Sleep(5);
 	}
 		
 }
 
 void DispatcherProc() {
-	int sem = SemGet(); // need the kernel support for sem 0
   int pid = GetPid();
   int time;
   int mailbox = 0;
 	msg_t readMsg;
-	sem = 0; //synchronize semaphores
+  if(printer_dispatch_sem == -1) printer_dispatch_sem = SemGet();
 	cons_printf("Dispatcher started\n");
 	while (1) {
     MsgRecv(mailbox, &readMsg);
     time = GetTime();
 		cons_printf("PID %d Dispatcher recieved msg.data = %d from msg.sender %d in mbox %d at %d\n", pid, readMsg.data, readMsg.sender, mailbox, time);
-		SemWait(sem);
+		SemWait(printer_dispatch_sem);
 		sharedData = readMsg.data;
 		cons_printf("PID %d Dispatcher wrote shared memory =  %d\n", pid, sharedData);
-    SemPost(sem);
+    SemPost(printer_dispatch_sem);
 	}
 
 }
